@@ -384,7 +384,7 @@ pub const WrenLoadModuleFn = fn (vm: *WrenVM, name: [*:0]const u8) callconv(.C) 
 
 /// Returns a pointer to a foreign method on [className] in [module] with
 /// [signature].
-pub const WrenBindForeignMethodFn = fn (module: [*:0]const u8, class_name: [*:0]const u8, is_static: bool, signature: [*:0]const u8) callconv(.C) *WrenForeignMethodFn;
+pub const WrenBindForeignMethodFn = fn (vm: *WrenVM, module: [*:0]const u8, class_name: [*:0]const u8, is_static: bool, signature: [*:0]const u8) callconv(.C) ?WrenForeignMethodFn;
 
 /// Displays a string of text to the user.
 pub const WrenWriteFn = fn (vm: *WrenVM, text: [*:0]const u8) callconv(.C) void;
