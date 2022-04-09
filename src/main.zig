@@ -28,7 +28,7 @@ pub fn main() anyerror!void {
     const print_handle = vm.makeCallHandle("print(_)");
     vm.ensureSlots(2);
     vm.getVariable("main", "System", 0);
-    vm.setSlotString(1, "Hello from zig!");
+    vm.setSlotString(1, "Hello from zig -> wren!");
     const result = vm.call(print_handle);
     std.debug.print("Result: {}\n", .{ result });
 
@@ -76,7 +76,7 @@ pub export fn bindForeignMethod(vm: *wren.WrenVM, module: [*:0]const u8, class_n
 }
 
 pub export fn zigHello(vm: *wren.WrenVM) void {
-    vm.setSlotString(0, "Hello from zig land!");
+    vm.setSlotString(0, "Hello from wren -> zig!");
 }
 
 pub export fn zigAdd(vm: *wren.WrenVM) void {
