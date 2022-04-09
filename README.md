@@ -1,7 +1,7 @@
 # wren-zig
 [Wren](https://wren.io/embedding/) bindings for [zig](https://ziglang.org/)!
 
-Still a work in progress. Details on how embedding wren works [here](https://wren.io/embedding/).
+Details on how embedding wren works [here](https://wren.io/embedding/).
 
 ## Bindings
 
