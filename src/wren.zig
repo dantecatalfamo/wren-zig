@@ -1,7 +1,4 @@
 const std = @import("std");
-const c = @cImport({
-    @cInclude("wren.h");
-});
 
 /// A single virtual machine for executing Wren code.
 ///
@@ -136,7 +133,8 @@ pub const WrenVM = opaque{
     pub fn getSlotBytes(self: *Self, slot: c_int) []const u8 {
         var len: c_int = 0;
         const ptr = wrenGetSlotBytes(self, slot, &len);
-        return ptr[0..len];
+        const ptr_len = @intCast(usize, len);
+        return ptr[0..ptr_len];
     }
 
     /// Reads a number from [slot].
@@ -170,7 +168,7 @@ pub const WrenVM = opaque{
     ///
     /// This will prevent the object that is referred to from being garbage collected
     /// until the handle is released by calling [wrenReleaseHandle()].
-    pub fn getSlotHandle(self: *Self, slot: c_int) WrenHandle {
+    pub fn getSlotHandle(self: *Self, slot: c_int) *WrenHandle {
         return wrenGetSlotHandle(self, slot);
     }
 
@@ -245,13 +243,13 @@ pub const WrenVM = opaque{
     /// Reads element [index] from the list in [listSlot] and stores it in
     /// [elementSlot].
     pub fn getListElement(self: *Self, list_slot: c_int, index: c_int, element_slot: c_int) void {
-        return wrenGetListElement(Self, list_slot, index, element_slot);
+        return wrenGetListElement(self, list_slot, index, element_slot);
     }
 
     /// Sets the value stored at [index] in the list at [listSlot],
     /// to the value from [elementSlot].
     pub fn setListElement(self: *Self, list_slot: c_int, index: c_int, element_slot: c_int) void {
-        return wrenSetListElement(Self, list_slot, index, element_slot);
+        return wrenSetListElement(self, list_slot, index, element_slot);
     }
 
     /// Takes the value stored at [elementSlot] and inserts it into the list stored
@@ -276,12 +274,12 @@ pub const WrenVM = opaque{
     /// Retrieves a value with the key in [keySlot] from the map in [mapSlot] and
     /// stores it in [valueSlot].
     pub fn getMapValue(self: *Self, map_slot: c_int, key_slot: c_int, value_slot: c_int) void {
-        return wrenGetMapValue(Self, map_slot, key_slot, value_slot);
+        return wrenGetMapValue(self, map_slot, key_slot, value_slot);
     }
 
     /// Takes the value stored at [valueSlot] and inserts it into the map stored
     /// at [mapSlot] with key [keySlot].
-    pub fn setMapValue(vm: WrenVM, map_slot: c_int, key_slot: c_int, value_slot: c_int) void {
+    pub fn setMapValue(self: *Self, map_slot: c_int, key_slot: c_int, value_slot: c_int) void {
         return wrenSetMapValue(self, map_slot, key_slot, value_slot);
     }
 
@@ -365,9 +363,6 @@ pub const WrenFinalizerFn = fn (data: *anyopaque) callconv(.C) void;
 /// that contains the import. Typically, this is used to implement relative
 /// imports.
 pub const WrenResolveModuleFn = fn (vm: *WrenVM, importer: [*:0]const u8, name: [*:0]const u8) callconv(.C) [*:0]const u8;
-
-/// Forward declare
-pub const WrenLoadModuleResult = opaque{};
 
 /// Called after loadModuleFn is called for module [name]. The original returned result
 /// is handed back to you in this callback, so that you can free
@@ -597,7 +592,7 @@ pub extern fn wrenNewVM(configuration: ?*WrenConfiguration) *WrenVM;
 
 /// Disposes of all resources is use by [vm], which was previously created by a
 /// call to [wrenNewVM].
-pub extern fn wrenFreeVM(vm: *vmWrenVM) void;
+pub extern fn wrenFreeVM(vm: *WrenVM) void;
 
 /// Immediately run the garbage collector to free unused memory.
 pub extern fn wrenCollectGarbage(vm: *WrenVM) void;
@@ -725,7 +720,7 @@ pub extern fn wrenGetSlotString(vm: *WrenVM, slot: c_int) [*:0]const u8;
 ///
 /// This will prevent the object that is referred to from being garbage collected
 /// until the handle is released by calling [wrenReleaseHandle()].
-pub extern fn wrenGetSlotHandle(vm: *WrenVM, slot: c_int) WrenHandle;
+pub extern fn wrenGetSlotHandle(vm: *WrenVM, slot: c_int) *WrenHandle;
 
 /// Stores the boolean [value] in [slot].
 pub extern fn wrenSetSlotBool(wm: *WrenVM, slot: c_int, value: bool) void;
@@ -802,7 +797,7 @@ pub extern fn wrenGetMapValue(vm: *WrenVM, map_slot: c_int, key_slot: c_int, val
 
 /// Takes the value stored at [valueSlot] and inserts it into the map stored
 /// at [mapSlot] with key [keySlot].
-pub extern fn wrenSetMapValue(vm: WrenVM, map_slot: c_int, key_slot: c_int, value_slot: c_int) void;
+pub extern fn wrenSetMapValue(vm: *WrenVM, map_slot: c_int, key_slot: c_int, value_slot: c_int) void;
 
 /// Removes a value from the map in [mapSlot], with the key from [keySlot],
 /// and place it in [removedValueSlot]. If not found, [removedValueSlot] is

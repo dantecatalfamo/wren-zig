@@ -1,5 +1,5 @@
 const std = @import("std");
-const wren = @import("../wren.zig");
+const wren = @import("wren.zig");
 
 pub fn main() anyerror!void {
     std.log.info("All your codebase are belong to us.", .{});
@@ -7,4 +7,9 @@ pub fn main() anyerror!void {
 
 test "basic test" {
     try std.testing.expectEqual(10, 3 + 7);
+}
+
+test "ref all" {
+    std.testing.refAllDecls(wren);
+    std.testing.refAllDecls(wren.WrenVM);
 }
