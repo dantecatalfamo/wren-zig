@@ -19,11 +19,6 @@ pub fn build(b: *std.build.Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
-    exe.addIncludePath("wren/src/include");
-    exe.addIncludePath("wren/src/vm");
-    exe.addIncludePath("wren/src/optional");
-    exe.addCSourceFiles(&c_files, &.{});
-    exe.linkSystemLibrary("m");
 
     const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
@@ -38,14 +33,17 @@ pub fn build(b: *std.build.Builder) void {
     exe_tests.step.dependOn(submodule_step);
     exe_tests.setTarget(target);
     exe_tests.setBuildMode(mode);
-    exe_tests.addIncludePath("wren/src/include");
-    exe_tests.addIncludePath("wren/src/vm");
-    exe_tests.addIncludePath("wren/src/optional");
-    exe_tests.addCSourceFiles(&c_files, &.{});
-    exe_tests.linkSystemLibrary("m");
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+}
+
+pub fn addWren(self: *std.build.LibExeObjStep) !void {
+    self.addIncludePath("wren/src/include");
+    self.addIncludePath("wren/src/vm");
+    self.addIncludePath("wren/src/optional");
+    self.addCSourceFiles(&c_files, &.{});
+    self.linkSystemLibrary("m");
 }
 
 pub fn fetchSubmodule(self: *std.build.Step) !void {
