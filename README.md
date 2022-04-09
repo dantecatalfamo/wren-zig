@@ -1,6 +1,8 @@
 # wren-zig
 [Wren](https://wren.io/embedding/) bindings for [zig](https://ziglang.org/)!
 
+Wren is a fast lua-sized scripting language with classes and concurrency.
+
 Details on how embedding wren works [here](https://wren.io/embedding/).
 
 ## Bindings
