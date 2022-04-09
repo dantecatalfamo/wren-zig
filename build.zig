@@ -11,7 +11,11 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
+    const submodule_step = b.step("submodule", "Pull in git submodule");
+    submodule_step.makeFn = fetchSubmodule;
+
     const exe = b.addExecutable("wren-zig", "src/main.zig");
+    exe.step.dependOn(submodule_step);
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
@@ -31,6 +35,7 @@ pub fn build(b: *std.build.Builder) void {
     run_step.dependOn(&run_cmd.step);
 
     const exe_tests = b.addTest("src/main.zig");
+    exe_tests.step.dependOn(submodule_step);
     exe_tests.setTarget(target);
     exe_tests.setBuildMode(mode);
     exe_tests.addIncludePath("wren/src/include");
@@ -41,6 +46,14 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+}
+
+pub fn fetchSubmodule(self: *std.build.Step) !void {
+    _ = self;
+    var allocator = std.heap.page_allocator;
+    var process = try std.ChildProcess.init(&.{"git", "submodule", "update", "--init"}, allocator);
+    defer process.deinit();
+    _ = try process.spawnAndWait();
 }
 
 const c_files = [_][]const u8 {
