@@ -3,18 +3,20 @@ const mem = std.mem;
 const wren = @import("wren.zig");
 
 pub fn main() anyerror!void {
+    // Optional, use zig allocator for wren
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    var allocator = gpa.allocator();
+    var wren_alloc = wren.WrenAllocator.init(allocator);
+    defer wren_alloc.deinit();
+
     var config: wren.WrenConfiguration = undefined;
     wren.wrenInitConfiguration(&config);
     config.write_fn = writeFn;
     config.error_fn = errorFn;
     config.bind_foreign_method_fn = bindForeignMethod;
 
-    // Optional, use zig allocator
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    var allocator = gpa.allocator();
-    var wren_alloc = wren.WrenAllocator.init(allocator);
-    defer wren_alloc.deinit();
-
+    // Setup zig allocator in wren
     config.reallocate_fn = wren.zigWrenAlloc;
     config.user_data = &wren_alloc;
 
