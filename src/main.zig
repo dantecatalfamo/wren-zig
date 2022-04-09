@@ -51,10 +51,12 @@ pub export fn bindForeignMethod(vm: *wren.WrenVM, module: [*:0]const u8, class_n
     _ = vm;
     if (mem.eql(u8, mem.span(module), "main")) {
         if (mem.eql(u8, mem.span(class_name), "Zig")) {
-            if (is_static and mem.eql(u8, mem.span(signature), "add(_,_)")) {
-                return zigAdd;
-            } else if (is_static and mem.eql(u8, mem.span(signature), "hello()")) {
-                return zigHello;
+            if (is_static) {
+                if (mem.eql(u8, mem.span(signature), "add(_,_)")) {
+                    return zigAdd;
+                } else if (mem.eql(u8, mem.span(signature), "hello()")) {
+                    return zigHello;
+                }
             }
         }
     }
