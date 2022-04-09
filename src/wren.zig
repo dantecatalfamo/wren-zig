@@ -1,4 +1,5 @@
 const std = @import("std");
+const mem = std.mem;
 
 /// A single virtual machine for executing Wren code.
 ///
@@ -325,6 +326,67 @@ pub const WrenVM = opaque{
     }
 };
 
+pub const WrenAllocator = struct {
+    allocator: mem.Allocator,
+    ptr_size_map: std.AutoHashMap(usize, usize),
+
+    const Self = @This();
+
+    pub fn init(allocator: mem.Allocator) Self {
+        return .{
+            .allocator = allocator,
+            .ptr_size_map = std.AutoHashMap(usize, usize).init(allocator),
+        };
+    }
+
+    pub fn deinit(self: *Self) void {
+        var iter = self.ptr_size_map.iterator();
+        while (iter.next()) |entry| {
+            const ptr = @intToPtr([*]u8, entry.key_ptr.*);
+            const size = entry.value_ptr.*;
+            const memory = ptr[0..size];
+            self.allocator.free(memory);
+        }
+        self.ptr_size_map.deinit();
+    }
+
+    pub fn alloc(self: *Self, size: usize) ?*anyopaque {
+        const new_memory = self.allocator.alloc(u8, size) catch return null;
+        self.ptr_size_map.put(@ptrToInt(new_memory.ptr), new_memory.len) catch return null;
+        return new_memory.ptr;
+    }
+
+    pub fn realloc(self: *Self, old_ptr: *anyopaque, new_size: usize) ?*anyopaque {
+        const old_size = self.ptr_size_map.get(@ptrToInt(old_ptr)) orelse return null;
+        const old_memory = @ptrCast([*]u8, old_ptr)[0..old_size];
+        const new_memory = self.allocator.realloc(old_memory, new_size) catch return null;
+        _ = self.ptr_size_map.remove(@ptrToInt(old_ptr));
+        self.ptr_size_map.put(@ptrToInt(new_memory.ptr), new_memory.len) catch return null;
+        return new_memory.ptr;
+    }
+
+    pub fn free(self: *Self, ptr: *anyopaque) void {
+        const size = self.ptr_size_map.get(@ptrToInt(ptr)) orelse unreachable;
+        const memory = @ptrCast([*]u8, ptr)[0..size];
+        self.allocator.free(memory);
+        _ = self.ptr_size_map.remove(@ptrToInt(ptr));
+    }
+};
+
+pub export fn zigWrenAlloc(ptr: ?*anyopaque, size: usize, user_data: ?*anyopaque) ?*anyopaque {
+    const zig_wren_alloc = @ptrCast(*WrenAllocator, @alignCast(@alignOf(WrenAllocator), user_data));
+    if (ptr == null and size == 0) {
+        return null;
+    } else if (ptr == null) {
+        return zig_wren_alloc.alloc(size);
+    } else if (size == 0) {
+        zig_wren_alloc.free(ptr.?);
+        return null;
+    } else {
+        return zig_wren_alloc.realloc(ptr.?, size);
+    }
+}
+
 /// A handle to a Wren object.
 ///
 /// This lets code outside of the VM hold a persistent reference to an object.
@@ -347,7 +409,7 @@ pub const WrenHandle = opaque{};
 ///
 /// - To free memory, [memory] will be the memory to free and [newSize] will be
 ///   zero. It should return NULL.
-pub const WrenReallocateFn = fn (memory: ?*anyopaque, new_size: usize, user_data: ?*anyopaque) callconv(.C) void;
+pub const WrenReallocateFn = fn (memory: ?*anyopaque, new_size: usize, user_data: ?*anyopaque) callconv(.C) ?*anyopaque;
 
 /// A function callable from Wren code, but implemented in C.
 pub const WrenForeignMethodFn = fn (vm: *WrenVM) callconv(.C) void;
