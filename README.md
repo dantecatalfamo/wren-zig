@@ -19,6 +19,30 @@ vm.getSlotDouble(0);
 
 Just run `zig build`, automatically pulls in git submodule if not already done
 
+## Embedding
+
+Add the following to your `build.zig`, with the paths changed to match the correct location
+
+```zig
+exe.addIncludePath("wren/src/include");
+exe.addIncludePath("wren/src/vm");
+exe.addIncludePath("wren/src/optional");
+exe.addCSourceFiles(&c_files, &.{});
+exe.linkSystemLibrary("m");
+
+const c_files = [_][]const u8 {
+    "wren/src/optional/wren_opt_meta.c",
+    "wren/src/optional/wren_opt_random.c",
+    "wren/src/vm/wren_compiler.c",
+    "wren/src/vm/wren_core.c",
+    "wren/src/vm/wren_debug.c",
+    "wren/src/vm/wren_primitive.c",
+    "wren/src/vm/wren_utils.c",
+    "wren/src/vm/wren_value.c",
+    "wren/src/vm/wren_vm.c",
+};
+```
+
 ## Example
 
 A very basic example
