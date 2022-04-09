@@ -1,7 +1,7 @@
 # wren-zig
 Wren bindings for zig!
 
-Still a work in progress
+Still a work in progress. Details on how embedding wren works [here](https://wren.io/embedding/).
 
 ## Bindings
 
