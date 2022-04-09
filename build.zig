@@ -16,6 +16,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const exe = b.addExecutable("wren-zig", "src/main.zig");
     exe.step.dependOn(submodule_step);
+    addWren(exe);
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
@@ -31,6 +32,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const exe_tests = b.addTest("src/main.zig");
     exe_tests.step.dependOn(submodule_step);
+    addWren(exe_tests);
     exe_tests.setTarget(target);
     exe_tests.setBuildMode(mode);
 
@@ -38,7 +40,7 @@ pub fn build(b: *std.build.Builder) void {
     test_step.dependOn(&exe_tests.step);
 }
 
-pub fn addWren(self: *std.build.LibExeObjStep) !void {
+pub fn addWren(self: *std.build.LibExeObjStep) void {
     self.addIncludePath("wren/src/include");
     self.addIncludePath("wren/src/vm");
     self.addIncludePath("wren/src/optional");
