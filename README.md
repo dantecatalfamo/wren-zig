@@ -54,14 +54,13 @@ const std = @import("std");
 const wren = @import("wren.zig");
 
 pub fn main() anyerror!void {
-    var config: wren.WrenConfiguration = undefined;
-    wren.wrenInitConfiguration(&config);
+    var config = wren.newConfig();
     config.write_fn = writeFn;
     config.error_fn = errorFn;
     var vm = wren.wrenNewVM(&config);
     defer vm.free();
 
-    _ = vm.interpret("main", "System.print(\"Hello, world!\")");
+    try vm.interpret("main", "System.print(\"Hello, world!\")");
 }
 
 pub export fn writeFn(vm: *wren.WrenVM, text: [*:0]const u8) void {

@@ -21,8 +21,13 @@ pub const WrenVM = opaque{
 
     /// Runs [source], a string of Wren source code in a new fiber in [vm] in the
     /// context of resolved [module].
-    pub fn interpret(self: *Self, module: [*:0]const u8, source: [*:0]const u8) WrenInterpretResult {
-        return wrenInterpret(self, module, source);
+    pub fn interpret(self: *Self, module: [*:0]const u8, source: [*:0]const u8) !void {
+        const value = wrenInterpret(self, module, source);
+        switch (value) {
+            .WREN_RESULT_COMPILE_ERROR => return error.CompileError,
+            .WREN_RESULT_RUNTIME_ERROR => return error.RuntimeError,
+            else => {}
+        }
     }
 
     /// Creates a handle that can be used to invoke a method with [signature] on
@@ -47,8 +52,13 @@ pub const WrenVM = opaque{
     /// signature.
     ///
     /// After this returns, you can access the return value from slot 0 on the stack.
-    pub fn call(self: *Self, method: *WrenHandle) WrenInterpretResult {
-        return wrenCall(self, method);
+    pub fn call(self: *Self, method: *WrenHandle) !void {
+        const value = wrenCall(self, method);
+        switch (value) {
+            .WREN_RESULT_COMPILE_ERROR => return error.CompileError,
+            .WREN_RESULT_RUNTIME_ERROR => return error.RuntimeError,
+            else => {}
+        }
     }
 
     /// Releases the reference stored in [handle]. After calling this, [handle] can
@@ -385,6 +395,13 @@ pub export fn zigWrenAlloc(ptr: ?*anyopaque, size: usize, user_data: ?*anyopaque
     } else {
         return zig_wren_alloc.realloc(ptr.?, size);
     }
+}
+
+// Return an initialized wren configuration
+pub fn newConfig() WrenConfiguration {
+    var config: WrenConfiguration = undefined;
+    wrenInitConfiguration(&config);
+    return config;
 }
 
 /// A handle to a Wren object.

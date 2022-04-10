@@ -10,8 +10,7 @@ pub fn main() anyerror!void {
     var wren_alloc = wren.WrenAllocator.init(allocator);
     defer wren_alloc.deinit();
 
-    var config: wren.WrenConfiguration = undefined;
-    wren.wrenInitConfiguration(&config);
+    var config = wren.newConfig();
     config.write_fn = writeFn;
     config.error_fn = errorFn;
     config.bind_foreign_method_fn = bindForeignMethod;
@@ -23,14 +22,13 @@ pub fn main() anyerror!void {
     var vm = wren.wrenNewVM(&config);
     defer vm.free();
 
-    _ = vm.interpret("main", "System.print(\"Hello, world!\")");
+    try vm.interpret("main", "System.print(\"Hello, world!\")");
 
     const print_handle = vm.makeCallHandle("print(_)");
     vm.ensureSlots(2);
     vm.getVariable("main", "System", 0);
     vm.setSlotString(1, "Hello from zig -> wren!");
-    const result = vm.call(print_handle);
-    std.debug.print("Result: {}\n", .{ result });
+    try vm.call(print_handle);
 
     const foreignMethod =
         \\class Zig {
@@ -38,9 +36,9 @@ pub fn main() anyerror!void {
         \\  foreign static add(a, b)
         \\}
     ;
-    _ = vm.interpret("main", foreignMethod);
-    _ = vm.interpret("main", "System.print(Zig.hello())");
-    _ = vm.interpret("main", "System.print(Zig.add(2, 3))");
+    try vm.interpret("main", foreignMethod);
+    try vm.interpret("main", "System.print(Zig.hello())");
+    try vm.interpret("main", "System.print(Zig.add(2, 3))");
 }
 
 pub export fn writeFn(vm: *wren.WrenVM, text: [*:0]const u8) void {
