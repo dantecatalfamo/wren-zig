@@ -904,25 +904,3 @@ pub extern fn wrenGetUserData(vm: *WrenVM) ?*anyopaque;
 
 /// Sets user data associated with the WrenVM.
 pub extern fn wrenSetUserData(vm: *WrenVM, user_data: ?*anyopaque) void;
-
-
-// Zigmod linking
-pub fn addWren(self: *std.build.LibExeObjStep) void {
-    self.addIncludePath("wren/src/include");
-    self.addIncludePath("wren/src/vm");
-    self.addIncludePath("wren/src/optional");
-    self.addCSourceFiles(&c_files, &.{});
-    self.linkSystemLibrary("m");
-}
-
-const c_files = [_][]const u8 {
-    "wren/src/optional/wren_opt_meta.c",
-    "wren/src/optional/wren_opt_random.c",
-    "wren/src/vm/wren_compiler.c",
-    "wren/src/vm/wren_core.c",
-    "wren/src/vm/wren_debug.c",
-    "wren/src/vm/wren_primitive.c",
-    "wren/src/vm/wren_utils.c",
-    "wren/src/vm/wren_value.c",
-    "wren/src/vm/wren_vm.c",
-};
