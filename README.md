@@ -26,11 +26,11 @@ Just run `zig build`, automatically pulls in git submodule if not already done
 Add the following to your `build.zig`, with the paths changed to match the correct location
 
 ```zig
-const wren = @import("wren-zig/build.zig");
+const addWren = @import("wren-zig/build.zig").addWren;
 
 pub fn build(b: *std.build.Builder) void {
     [...]
-    wren.addWren(exe);
+    addWren(exe);
     [...]
 }
 ```
