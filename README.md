@@ -30,6 +30,7 @@ const addWren = @import("wren-zig/build.zig").addWren;
 
 pub fn build(b: *std.build.Builder) void {
     [...]
+    const exe = b.addExecutable("wren-zig", "src/main.zig");
     addWren(exe);
     [...]
 }
