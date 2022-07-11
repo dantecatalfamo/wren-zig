@@ -1,6 +1,6 @@
 const std = @import("std");
 const mem = std.mem;
-const wren = @import("wren.zig");
+const wren = @import("wren");
 
 pub fn main() anyerror!void {
     // Optional, use zig allocator for wren

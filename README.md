@@ -41,7 +41,7 @@ A very basic example
 
 ```zig
 const std = @import("std");
-const wren = @import("wren.zig");
+const wren = @import("wren");
 
 pub fn main() anyerror!void {
     var config = wren.newConfig();

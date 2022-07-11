@@ -42,10 +42,13 @@ pub fn addWren(exe: *std.build.LibExeObjStep) void {
     const include_path = path.join(allocator, &.{ src_path, "wren", "src", "include" }) catch unreachable;
     const vm_path = path.join(allocator, &.{ src_path, "wren", "src", "vm" }) catch unreachable;
     const optional_path = path.join(allocator, &.{ src_path, "wren", "src", "optional" }) catch unreachable;
+    const package_path = path.join(allocator, &.{ src_path, "src", "wren.zig" }) catch unreachable;
+
     exe.addIncludePath(include_path);
     exe.addIncludePath(vm_path);
     exe.addIncludePath(optional_path);
     exe.linkSystemLibrary("m");
+    exe.addPackagePath("wren", package_path);
 
     for (vm_c_files) |vm_c_file| {
         const c_path = path.join(allocator, &.{ vm_path, vm_c_file }) catch unreachable;
