@@ -17,13 +17,9 @@ wrenGetSlotDouble(vm, 0);
 vm.getSlotDouble(0);
 ```
 
-## Building
-
-Just run `zig build`, automatically pulls in git submodule if not already done
-
 ## Embedding
 
-Add the following to your `build.zig`, with the paths changed to match the correct location
+Recursively clone this repository and add the following to your `build.zig`, with the paths changed to match the correct location
 
 ```zig
 const addWren = @import("wren-zig/build.zig").addWren;
