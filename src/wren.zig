@@ -429,10 +429,10 @@ pub const WrenHandle = opaque{};
 ///
 /// - To free memory, [memory] will be the memory to free and [newSize] will be
 ///   zero. It should return NULL.
-pub const WrenReallocateFn = fn (memory: ?*anyopaque, new_size: usize, user_data: ?*anyopaque) callconv(.C) ?*anyopaque;
+pub const WrenReallocateFn = *const fn (memory: ?*anyopaque, new_size: usize, user_data: ?*anyopaque) callconv(.C) ?*anyopaque;
 
 /// A function callable from Wren code, but implemented in C.
-pub const WrenForeignMethodFn = fn (vm: *WrenVM) callconv(.C) void;
+pub const WrenForeignMethodFn = *const fn (vm: *WrenVM) callconv(.C) void;
 
 /// A finalizer function for freeing resources owned by an instance of a foreign
 /// class. Unlike most foreign methods, finalizers do not have access to the VM
@@ -444,12 +444,12 @@ pub const WrenFinalizerFn = fn (data: *anyopaque) callconv(.C) void;
 /// potentially taking into account the (previously resolved) name of the module
 /// that contains the import. Typically, this is used to implement relative
 /// imports.
-pub const WrenResolveModuleFn = fn (vm: *WrenVM, importer: [*:0]const u8, name: [*:0]const u8) callconv(.C) [*:0]const u8;
+pub const WrenResolveModuleFn = *const fn (vm: *WrenVM, importer: [*:0]const u8, name: [*:0]const u8) callconv(.C) [*:0]const u8;
 
 /// Called after loadModuleFn is called for module [name]. The original returned result
 /// is handed back to you in this callback, so that you can free
 /// memory if appropriate.
-pub const WrenLoadModuleCompleteFn = fn (vm: *WrenVM, name: [*:0]const u8, result: WrenLoadModuleResult) callconv(.C) void;
+pub const WrenLoadModuleCompleteFn = *const fn (vm: *WrenVM, name: [*:0]const u8, result: WrenLoadModuleResult) callconv(.C) void;
 
 /// The result of a loadModuleFn call.
 /// [source] is the source code for the module, or NULL if the module is not found.
@@ -462,14 +462,14 @@ pub const WrenLoadModuleResult = extern struct {
 };
 
 /// Loads and returns the source code for the module [name].
-pub const WrenLoadModuleFn = fn (vm: *WrenVM, name: [*:0]const u8) callconv(.C) *WrenLoadModuleResult;
+pub const WrenLoadModuleFn = *const fn (vm: *WrenVM, name: [*:0]const u8) callconv(.C) *WrenLoadModuleResult;
 
 /// Returns a pointer to a foreign method on [className] in [module] with
 /// [signature].
-pub const WrenBindForeignMethodFn = fn (vm: *WrenVM, module: [*:0]const u8, class_name: [*:0]const u8, is_static: bool, signature: [*:0]const u8) callconv(.C) ?WrenForeignMethodFn;
+pub const WrenBindForeignMethodFn = *const fn (vm: *WrenVM, module: [*:0]const u8, class_name: [*:0]const u8, is_static: bool, signature: [*:0]const u8) callconv(.C) ?WrenForeignMethodFn;
 
 /// Displays a string of text to the user.
-pub const WrenWriteFn = fn (vm: *WrenVM, text: [*:0]const u8) callconv(.C) void;
+pub const WrenWriteFn = *const fn (vm: *WrenVM, text: [*:0]const u8) callconv(.C) void;
 
 pub const WrenErrorType = enum(c_int) {
     /// A syntax or resolution error detected at compile time.
@@ -494,7 +494,7 @@ pub const WrenErrorType = enum(c_int) {
 /// made for each line in the stack trace. Each of those has the resolved
 /// [module] and [line] where the method or function is defined and [message] is
 /// the name of the method or function.
-pub const WrenErrorFn = fn (vm: *WrenVM, err_type: WrenErrorType, module: [*:0]const u8, line: c_int, message: [*:0]const u8) callconv(.C) void;
+pub const WrenErrorFn = *const fn (vm: *WrenVM, err_type: WrenErrorType, module: [*:0]const u8, line: c_int, message: [*:0]const u8) callconv(.C) void;
 
 pub const WrenForeignClassMethods = extern struct {
     /// The callback invoked when the foreign object is created.
@@ -512,7 +512,7 @@ pub const WrenForeignClassMethods = extern struct {
 
 /// Returns a pair of pointers to the foreign methods used to allocate and
 /// finalize the data for instances of [className] in resolved [module].
-pub const WrenBindForeignClassFn = fn (vm: *WrenVM, module: [*:0]const u8, class_name: [*:0]const u8) callconv(.C) *WrenForeignClassMethods;
+pub const WrenBindForeignClassFn = *const fn (vm: *WrenVM, module: [*:0]const u8, class_name: [*:0]const u8) callconv(.C) *WrenForeignClassMethods;
 
 pub const WrenConfiguration = extern struct {
     /// The callback Wren will use to allocate, reallocate, and deallocate memory.
