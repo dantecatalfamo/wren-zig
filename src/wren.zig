@@ -438,7 +438,7 @@ pub const WrenForeignMethodFn = *const fn (vm: *WrenVM) callconv(.C) void;
 /// class. Unlike most foreign methods, finalizers do not have access to the VM
 /// and should not interact with it since it's in the middle of a garbage
 /// collection.
-pub const WrenFinalizerFn = fn (data: *anyopaque) callconv(.C) void;
+pub const WrenFinalizerFn = *const fn (data: *anyopaque) callconv(.C) void;
 
 /// Gives the host a chance to canonicalize the imported module name,
 /// potentially taking into account the (previously resolved) name of the module
