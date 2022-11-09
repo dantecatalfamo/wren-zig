@@ -1,0 +1,6 @@
+id: wpjyvrq37r3g1kw9n3gz36s0749oxrk6ztw0fgb25id5ewz4
+name: wren-zig
+main: src/wren.zig
+license: none
+description: Wren bindings for zig!
+dependencies:
